@@ -11,7 +11,7 @@ from causallearn.graph.Endpoint import Endpoint
 from causallearn.graph.GeneralGraph import GeneralGraph
 from causallearn.graph.GraphNode import GraphNode
 from causallearn.graph.Node import Node
-from causallearn.utils.DAG2PAG import dag2pag
+from dag2pag.dag2pag import dag2pag
 from causallearn.utils.GraphUtils import GraphUtils
 from causallearn.utils.TXT2GeneralGraph import txt2generalgraph
 from matplotlib import image as mpimg
@@ -70,6 +70,7 @@ class PAG(SCCausalGraph):
         errors = 0
         for x, y in [(x.get_name(), y.get_name()) for i, x in enumerate(ground_truth.get_nodes()) for j, y in
                      enumerate(ground_truth.get_nodes()) if i < j]:
+            
             if ground_truth.is_adjacent_to(ground_truth.get_node(x), ground_truth.get_node(y)):
                 gt_edge = ground_truth.get_edge(ground_truth.get_node(x), ground_truth.get_node(y))
                 if not self.graph.is_adjacent_to(self.graph.get_node(x), self.graph.get_node(y)):
@@ -89,6 +90,8 @@ class PAG(SCCausalGraph):
                     errors += 1 if hat_edge.get_endpoint1() != Endpoint.CIRCLE else 0
                     errors += 1 if hat_edge.get_endpoint2() != Endpoint.CIRCLE else 0
         return errors
+    
+    
 
     @staticmethod
     def valid_metrics() -> List[str]:
@@ -101,9 +104,12 @@ class PAG(SCCausalGraph):
     def marginalize(self, remaining_nodes: Iterable[Any]) -> PAG:
         mag = self.draw_random_mag()
         canonic_dag, dummy_latents = self._mag_to_canonic_dag(mag)
+        
+    
         latent_nodes = [canonic_dag.get_node(n) for n in
                         set(self.variables()).difference(remaining_nodes)] + dummy_latents
-        marginalised_pag = dag2pag(canonic_dag, islatent=latent_nodes)
+        
+        marginalised_pag = dag2pag(canonic_dag, remaining_nodes)
         return PAG(marginalised_pag)
 
     def save_graph(self, graph_dir: str):

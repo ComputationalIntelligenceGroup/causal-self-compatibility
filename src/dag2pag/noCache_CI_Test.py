@@ -1,0 +1,96 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Oct 30 19:56:41 2025
+
+@author: chdem
+"""
+
+from pgmpy.estimators.CITests import *
+import pandas as pd
+import numpy as np
+from math import log, sqrt
+from numba import njit
+from scipy.stats import norm
+
+
+class myTest:
+    
+    def __init__(self, data, **kwargs):
+        self.data = data
+        self.correlation_matrix = np.corrcoef(data.T)
+        self.sample_size, self.num_features = data.shape
+   
+    
+    def __call__(self, X, Y, condition_set=None):
+        
+        
+        x, y = sorted([int(X), int(Y)])
+        condition_set = sorted(set(map(int, condition_set or [])))
+
+        if x in condition_set or y in condition_set:
+            raise ValueError("X or Y in conditioning set.")
+
+        var_idx = [x, y] + condition_set
+        sub_corr_matrix = self.correlation_matrix[np.ix_(var_idx, var_idx)]
+
+        
+        try:
+            inv = np.linalg.inv(sub_corr_matrix)
+            #inv = self.full_precision[np.ix_(var_idx, var_idx)]
+        except np.linalg.LinAlgError:
+            inv = np.linalg.pinv(sub_corr_matrix)
+        r = -inv[0, 1] / sqrt(abs(inv[0, 0] * inv[1, 1]))
+        if abs(r) >= 1: r = (1. - np.finfo(float).eps) * np.sign(r) # may happen when samplesize is very small or relation is deterministic
+        Z = 0.5 * log((1 + r) / (1 - r))
+        X = sqrt(self.sample_size - len(condition_set) - 3) * abs(Z)
+        p = 2 * (1 - norm.cdf(abs(X)))
+        
+        return p
+    
+
+
+def fast_partial_corr_jit_df(df, x_col, y_col, z_cols):
+    """
+    Compute partial correlation r and p-value between x_col and y_col
+    given conditioning columns z_cols, using JIT-accelerated code.
+    """
+    X = df[x_col].values
+    Y = df[y_col].values
+    Z = df[z_cols].values if z_cols else np.empty((len(X), 0))
+    return _fast_partial_corr_jit(X, Y, Z)
+
+@njit
+def _fast_partial_corr_jit(X, Y, Z):
+    n = X.shape[0]
+    k = Z.shape[1]
+
+    if k == 0:
+        # Just Pearson correlation
+        r = np.dot(X, Y) / (np.linalg.norm(X) * np.linalg.norm(Y))
+    else:
+
+        
+        Q, R = np.linalg.qr(Z)
+        Z_pinv = np.linalg.inv(R) @ Q.T
+
+        X_res = X - Z @ (Z_pinv @ X)
+        Y_res = Y - Z @ (Z_pinv @ Y)
+        r = np.dot(X_res, Y_res) / (np.linalg.norm(X_res) * np.linalg.norm(Y_res))
+
+    # Fisher-style t-statistic and normal approximation
+    df = n - k - 2
+    t = r * np.sqrt(df / (1 - r**2))
+    z = np.abs(t)
+    p = 2 * (1 - math_erf(z / np.sqrt(2)))
+    return r, p
+
+@njit
+def math_erf(x):
+    # Abramowitz & Stegun rational approximation of erf(x)
+    sign = 1 if x >= 0 else -1
+    x = abs(x)
+    a1, a2, a3, a4, a5 = 0.254829592, -0.284496736, 1.421413741, -1.453152027, 1.061405429
+    p = 0.3275911
+    t = 1.0 / (1.0 + p * x)
+    y = 1.0 - (((((a5*t + a4)*t + a3)*t + a2)*t + a1)*t) * np.exp(-x*x)
+    return sign * y
