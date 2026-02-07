@@ -1,5 +1,10 @@
 # Code for "Self-Compatibility"
 
+This repository is a fork of [amazon-science/causal-self-compatibility](https://github.com/amazon-science/causal-self-compatibility).
+
+It includes modifications to replace the original SGS-based dag2pag procedure with an FCI-based approach, significantly improving computational efficiency and enabling graphical self-compatibility analysis on sparse graphs with hundreds of variables.
+
+
 ## Install
 Install requirements via
         
