@@ -16,9 +16,9 @@ from causallearn.utils.GraphUtils import GraphUtils
 from causallearn.utils.TXT2GeneralGraph import txt2generalgraph
 from matplotlib import image as mpimg
 
-from src.causal_graphs.sc_causal_graph import SCCausalGraph
-from src.m_separated import m_separated
-from src.metrics import skeleton_tpr, skeleton_fpr, skeleton_precision, skeleton_f1, avg_gt_degree
+from causal_graphs.sc_causal_graph import SCCausalGraph
+from m_separated import m_separated
+from metrics import skeleton_tpr, skeleton_fpr, skeleton_precision, skeleton_f1, avg_gt_degree
 
 
 class PAG(SCCausalGraph):
