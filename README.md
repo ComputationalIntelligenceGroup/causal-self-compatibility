@@ -4,6 +4,32 @@ This repository is a fork of [amazon-science/causal-self-compatibility](https://
 
 It includes modifications to replace the original SGS-based dag2pag procedure with an FCI-based approach, significantly improving computational efficiency and enabling graphical self-compatibility analysis on sparse graphs with hundreds of variables.
 
+## Citation
+
+This repository builds upon the work introduced in:
+
+**Faller et al., “Self-Compatibility: Evaluating Causal Discovery without Ground Truth”**, *Proceedings of The 27th International Conference on Artificial Intelligence and Statistics (AISTATS),* 2024.  
+https://proceedings.mlr.press/v238/faller24a.html
+
+### BibTeX
+
+```bibtex
+@InProceedings{pmlr-v238-faller24a,
+  title = {Self-Compatibility: Evaluating Causal Discovery without Ground Truth},
+  author = {Faller, Philipp M. and Vankadara, Leena C. and Mastakouri, Atalanti A. and Locatello, Francesco and Janzing, Dominik},
+  booktitle = {Proceedings of The 27th International Conference on Artificial Intelligence and Statistics},
+  pages = {4132--4140},
+  year = {2024},
+  editor = {Sanjoy Dasgupta and Stephan Mandt and Yingzhen Li},
+  volume = {238},
+  series = {Proceedings of Machine Learning Research},
+  publisher = {PMLR},
+  pdf = {https://proceedings.mlr.press/v238/faller24a/faller24a.pdf},
+  url = {https://proceedings.mlr.press/v238/faller24a.html}
+}
+
+
+
 
 ## Install
 Install requirements via
