@@ -31,7 +31,7 @@ https://proceedings.mlr.press/v238/faller24a.html
 
 
 
-##Install
+## Install
 Install requirements via
         
     pip -r requirements.txt
